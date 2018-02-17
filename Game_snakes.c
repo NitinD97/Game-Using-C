@@ -16,7 +16,7 @@ struct Snake{
     int y;
     char symbol;
     struct Snake *next;
-}*head=NULL;
+}*head=NULL,*tail=NULL;
 
 struct Food{
     int x;
@@ -62,6 +62,7 @@ void createSnakeTail()
     }
     temp->next=s;
     s->next=NULL;
+    tail=s;
 }
 
 void createSnake()
@@ -89,40 +90,17 @@ void displaySnake()
     printf("%c",food.symbol);
 }
 
-void increaseSnakeLength()
-{
-    struct Snake *s=head;
-
-}
-
 void updateCanvas(char canvas[15][15])
 {
+    canvas[food.x][food.y]=food.symbol;
     struct Snake *temp=head;
     while(temp!=NULL)
     {
         canvas[temp->x][temp->y]=temp->symbol;
         temp=temp->next;
-    }
-   /* int check=checkFoodEaten();
-    if(check)
-    {
-        increaseSnakeLength();
-    }*/
-    canvas[food.x][food.y]=food.symbol;
+    } 
 }
 
-/*int checkFoodEaten()
-{
-    struct Snake *s=head;
-    if((s->x==food.x) && (s->y==food.y))
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}*/
 
 void createCanvas(char canvas[15][15])
 {
@@ -206,6 +184,8 @@ void updateSnake(char dir)
     {
         return;
     }
+    //shifting values of snake clockwise once
+    //using stacks.
     int r[225],top=-1,c[255];
     struct Snake *temp=head;
     while(temp!=NULL)
@@ -230,6 +210,32 @@ void updateSnake(char dir)
 
 }
 
+int checkFoodEaten()
+{
+    struct Snake *s=head;
+    if((s->x==food.x) && (s->y==food.y))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void increaseSnakeLength(char dir)
+{
+    struct Snake *s=tail;
+    struct Snake *n=(struct Snake*) malloc(sizeof(struct Snake));
+    n->x=s->x;
+    n->y=s->y;
+    n->symbol='C';
+    n->next=NULL;
+    s->next=n;
+    s->symbol='O';
+    tail=n;
+}
+
 void moveSnake(char canvas[15][15])
 {
     int n=30;
@@ -241,6 +247,11 @@ void moveSnake(char canvas[15][15])
             dir=getch();
         }
         updateSnake(dir);
+        int hasFoodBeenEaten=checkFoodEaten();
+        if(hasFoodBeenEaten)
+        {
+            increaseSnakeLength(dir);
+        }
         createCanvas(canvas);
         updateCanvas(canvas);
         printf("\n");
