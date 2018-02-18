@@ -41,8 +41,8 @@ void createSnakeBody()
     s->symbol='O';
     s->x=2;
     s->y=3;
-    while(temp->next!=NULL)
-    {
+
+    while(temp->next!=NULL){
         temp=temp->next;
     }
     temp->next=s;
@@ -56,8 +56,8 @@ void createSnakeTail()
     s->symbol='C';
     s->x=2;
     s->y=4;
-    while(temp->next!=NULL)
-    {
+
+    while(temp->next!=NULL){
         temp=temp->next;
     }
     temp->next=s;
@@ -82,8 +82,8 @@ void createFood()
 void displaySnake()
 {
     struct Snake *temp=head;
-    while(temp!=NULL)
-    {
+
+    while(temp!=NULL){
         printf("%c",temp->symbol);
         temp=temp->next;
     }
@@ -94,8 +94,8 @@ void updateCanvas(char canvas[15][15])
 {
     canvas[food.x][food.y]=food.symbol;
     struct Snake *temp=head;
-    while(temp!=NULL)
-    {
+
+    while(temp!=NULL){
         canvas[temp->x][temp->y]=temp->symbol;
         temp=temp->next;
     } 
@@ -105,10 +105,9 @@ void updateCanvas(char canvas[15][15])
 void createCanvas(char canvas[15][15])
 {
     int i,j;
-    for(i=0;i<15;i++)
-    {
-        for(j=0;j<15;j++)
-        {
+    for(i=0;i<15;i++){
+
+        for(j=0;j<15;j++){
             canvas[i][j]='.';
             //printf("%c ",canvas[i][j]);
         }
@@ -119,10 +118,8 @@ void createCanvas(char canvas[15][15])
 void printcanvas(char canvas[15][15])
 {
     int i,j;
-    for(i=0;i<15;i++)
-    {
-        for(j=0;j<15;j++)
-        {
+    for(i=0;i<15;i++){
+        for(j=0;j<15;j++){
             //canvas[i][j]='.';
             printf("%c ",canvas[i][j]);
         }
@@ -147,49 +144,45 @@ void updateSnake(char dir)
     int x,y;
     x=getXOfSnakeHead();
     y=getYofSnakeHead();
-    if(dir=='i')
-    {
+
+    if(dir=='i'){
 
         x=x-1;  //up
-        if(x<0)
-        {
+        
+        if(x<0){
             x=14;
         }
     }
-    else if(dir=='j')
-    {
+    else if(dir=='j'){
         y=y-1;  //left
-        if(y<0)
-        {
+        
+        if(y<0){
             y=14;
         }
     }
-    else if(dir=='k')
-    {
+    else if(dir=='k'){
         x=x+1;  //down
-        if(x>14)
-        {
+
+        if(x>14){
             x=0;
         }
     }
-    else if(dir=='l')
-    {
+    else if(dir=='l'){
         y=y+1;  //right
-        if(y>14)
-        {
+
+        if(y>14){
             y=0;
         }
     }
-    else
-    {
+    else{
         return;
     }
     //shifting values of snake clockwise once
     //using stacks.
     int r[225],top=-1,c[255];
     struct Snake *temp=head;
-    while(temp!=NULL)
-    {
+
+    while(temp!=NULL){
         top++;
         r[top]=temp->x;
         c[top]=temp->y;
@@ -200,8 +193,8 @@ void updateSnake(char dir)
     temp1->x=x;
     temp1->y=y;
     temp1=temp1->next;
-    while(temp1!=NULL)
-    {
+
+    while(temp1!=NULL){
         temp1->x=r[i];
         temp1->y=c[i];
         i++;
@@ -213,12 +206,11 @@ void updateSnake(char dir)
 int checkFoodEaten()
 {
     struct Snake *s=head;
-    if((s->x==food.x) && (s->y==food.y))
-    {
+
+    if((s->x==food.x) && (s->y==food.y)){
         return 1;
     }
-    else
-    {
+    else{
         return 0;
     }
 }
@@ -236,27 +228,86 @@ void increaseSnakeLength(char dir)
     tail=n;
 }
 
+char directionCheck(char dir,char user)
+{
+    if(dir=='j' && user=='l'){
+        return dir;
+    }
+    if(dir=='l' && user=='j'){
+        return dir;
+    }
+    if(dir=='k' && user=='i'){
+        return dir;
+    }
+    if(dir=='i' && user=='k'){
+        return dir;
+    }
+    return user;
+}
+
+void changeFoodLocation()
+{
+    struct Snake *temp=head;
+    int r[15]={0}, c[15]={0},i=0;
+
+    while(temp!=NULL){
+        r[temp->x]=1;
+        c[temp->y]=1;
+        temp=temp->next;
+    }
+ printf("HERE");
+    while((r[food.x]!=0) && (c[food.y]!=0)){
+        food.x=rand()%14;
+        food.y=rand()%14;
+    }
+
+}
+
+int checkBodyTouch()
+{
+    struct Snake *temp=head;
+    int xOfHead=temp->x;
+    int yofHead=temp->y;
+    temp=temp->next;
+    while(temp!=NULL){
+
+        if((temp->x==xOfHead) && (temp->y==yofHead)){
+            return 1;
+        }
+        temp=temp->next;
+    }
+    return 0;
+}
+
 void moveSnake(char canvas[15][15])
 {
-    int n=30;
-    char dir='l';
-    while(n)
-    {
-        if(kbhit)
-        {
-            dir=getch();
+    int n=100;
+    char dir='j';
+    char dirCheck;
+    while(1){
+
+        if(kbhit){
+            dirCheck=getch();
+            dir=directionCheck(dir,dirCheck);
         }
         updateSnake(dir);
         int hasFoodBeenEaten=checkFoodEaten();
-        if(hasFoodBeenEaten)
-        {
+
+        if(hasFoodBeenEaten){
             increaseSnakeLength(dir);
+            changeFoodLocation();
+        }
+
+        int hasBodyTouched=checkBodyTouch();
+        if(hasBodyTouched)
+        {
+            printf("\n------------\nGame Over!!!\n------------\n");
+            break;
         }
         createCanvas(canvas);
         updateCanvas(canvas);
         printf("\n");
         printcanvas(canvas);
-        n--;
     }
 }
 
